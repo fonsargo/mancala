@@ -24,6 +24,7 @@ public class Board {
     private List<Integer> secondPlayerPits;
     private Integer secondPlayerLargePit;
     private PlayerTurn playerTurn;
+    private WinnerType winner;
 
     public Board() {
         this.firstPlayerPits = IntStream.range(0, PITS_COUNT).map(operand -> INITIAL_STONES_COUNT).boxed().collect(Collectors.toList());
@@ -47,6 +48,8 @@ public class Board {
         } else {
             makePlayerMove(pitIndex, secondPlayerPits, firstPlayerPits, this::addToSecondPlayerLargePit, PlayerTurn.FIRST_PLAYER);
         }
+
+        checkFinished();
     }
 
     private void makePlayerMove(int pitIndex, List<Integer> myPits, List<Integer> oppositePits,
@@ -54,6 +57,7 @@ public class Board {
         Integer stones = myPits.set(pitIndex, 0);
         if (stones == 0) {
             //todo throw
+            throw new IllegalArgumentException("Can't make move: pit with index: " + pitIndex + " is empty");
         }
 
         int startIndex = pitIndex + 1;
@@ -89,6 +93,29 @@ public class Board {
             startIndex = 0;
         }
         playerTurn = nextPlayer;
+    }
+
+    private void checkFinished() {
+        int firstPlayerSum = firstPlayerPits.stream().mapToInt(Integer::intValue).sum();
+        int secondPlayerSum = secondPlayerPits.stream().mapToInt(Integer::intValue).sum();
+        if (firstPlayerSum == 0 || secondPlayerSum == 0) {
+            if (firstPlayerSum > 0) {
+                firstPlayerLargePit += firstPlayerSum;
+                firstPlayerPits = IntStream.range(0, PITS_COUNT).map(operand -> 0).boxed().collect(Collectors.toList());
+            }
+            if (secondPlayerSum > 0) {
+                secondPlayerLargePit += secondPlayerSum;
+                secondPlayerPits = IntStream.range(0, PITS_COUNT).map(operand -> 0).boxed().collect(Collectors.toList());
+            }
+
+            if (firstPlayerLargePit > secondPlayerLargePit) {
+                winner = WinnerType.FIRST_PLAYER;
+            } else if (secondPlayerLargePit > firstPlayerLargePit) {
+                winner = WinnerType.SECOND_PLAYER;
+            } else {
+                winner = WinnerType.DRAW;
+            }
+        }
     }
 
     private void addToFirstPlayerLargePit(int stones) {

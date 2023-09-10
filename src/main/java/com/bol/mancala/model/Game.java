@@ -50,6 +50,9 @@ public class Game {
                 .orElseThrow(() -> new IllegalArgumentException("Player with ID: " + playerId + " doesn't participate in game with id: " + id));
 
         board.makeMove(playerTurn, pitIndex);
+        if (board.getWinner() != null) {
+            status = GameStatus.FINISHED;
+        }
     }
 
 }

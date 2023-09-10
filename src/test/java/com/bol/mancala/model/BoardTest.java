@@ -19,8 +19,9 @@ public class BoardTest {
                 1,
                 List.of(7, 6, 6, 6, 6, 6),
                 0,
-                PlayerTurn.SECOND_PLAYER);
-        assertThat(board).usingRecursiveComparison().isEqualTo(expected);
+                PlayerTurn.SECOND_PLAYER,
+                null);
+        assertThat(board).isEqualTo(expected);
     }
 
     @Test
@@ -33,8 +34,9 @@ public class BoardTest {
                 1,
                 List.of(6, 6, 6, 6, 6, 6),
                 0,
-                PlayerTurn.FIRST_PLAYER);
-        assertThat(board).usingRecursiveComparison().isEqualTo(expected);
+                PlayerTurn.FIRST_PLAYER,
+                null);
+        assertThat(board).isEqualTo(expected);
     }
 
     @Test
@@ -44,7 +46,8 @@ public class BoardTest {
                 0,
                 Lists.newArrayList(0, 0, 5, 3, 0, 0),
                 0,
-                PlayerTurn.FIRST_PLAYER);
+                PlayerTurn.FIRST_PLAYER,
+                null);
         board.makeMove(PlayerTurn.FIRST_PLAYER, 1);
 
         Board expected = new Board(
@@ -52,8 +55,9 @@ public class BoardTest {
                 6,
                 List.of(0, 0, 0, 3, 0, 0),
                 0,
-                PlayerTurn.SECOND_PLAYER);
-        assertThat(board).usingRecursiveComparison().isEqualTo(expected);
+                PlayerTurn.SECOND_PLAYER,
+                null);
+        assertThat(board).isEqualTo(expected);
     }
 
     @Test
@@ -63,7 +67,8 @@ public class BoardTest {
                 4,
                 Lists.newArrayList(4, 2, 5, 0, 8, 0),
                 3,
-                PlayerTurn.FIRST_PLAYER);
+                PlayerTurn.FIRST_PLAYER,
+                null);
         board.makeMove(PlayerTurn.FIRST_PLAYER, 0);
 
         Board expected = new Board(
@@ -71,8 +76,9 @@ public class BoardTest {
                 5,
                 List.of(5, 3, 6, 1, 9, 1),
                 3,
-                PlayerTurn.SECOND_PLAYER);
-        assertThat(board).usingRecursiveComparison().isEqualTo(expected);
+                PlayerTurn.SECOND_PLAYER,
+                null);
+        assertThat(board).isEqualTo(expected);
     }
 
     @Test
@@ -82,7 +88,8 @@ public class BoardTest {
                 4,
                 Lists.newArrayList(4, 2, 5, 0, 8, 0),
                 3,
-                PlayerTurn.FIRST_PLAYER);
+                PlayerTurn.FIRST_PLAYER,
+                null);
         board.makeMove(PlayerTurn.FIRST_PLAYER, 0);
 
         Board expected = new Board(
@@ -90,7 +97,30 @@ public class BoardTest {
                 7,
                 List.of(5, 3, 6, 1, 9, 0),
                 3,
-                PlayerTurn.SECOND_PLAYER);
-        assertThat(board).usingRecursiveComparison().isEqualTo(expected);
+                PlayerTurn.SECOND_PLAYER,
+                null);
+        assertThat(board).isEqualTo(expected);
+    }
+
+    @Test
+    void shouldFinishGame() {
+        Board board = new Board(
+                Lists.newArrayList(2, 5, 0, 2, 7, 0),
+                40,
+                Lists.newArrayList(0, 0, 0, 0, 0, 5),
+                30,
+                PlayerTurn.SECOND_PLAYER,
+                null);
+        board.makeMove(PlayerTurn.SECOND_PLAYER, 5);
+
+        Board expected = new Board(
+                List.of(0, 0, 0, 0, 0, 0),
+                60,
+                List.of(0, 0, 0, 0, 0, 0),
+                31,
+                PlayerTurn.FIRST_PLAYER,
+                WinnerType.FIRST_PLAYER
+                );
+        assertThat(board).isEqualTo(expected);
     }
 }
