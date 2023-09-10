@@ -20,19 +20,19 @@ public class GameServiceImpl implements GameService {
     @Override
     public Game createGame(long playerId) {
         Game game = new Game();
-        game.addPlayer(playerId);
+//        game.addPlayer(playerId);
         gameRepository.save(game);
         return game;
     }
 
     @Override
     public Optional<Game> connectToGame(long gameId, long playerId) {
-        return gameRepository.findById(gameId)
-                .map(game -> game.addPlayer(playerId));
+        return gameRepository.findById(gameId);
+//                .map(game -> game.addPlayer(playerId));
     }
 
     @Override
     public Optional<Game> makeMove(long gameId, long playerId, int pitIndex) {
-
+        return gameRepository.findById(gameId);
     }
 }
