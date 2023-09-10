@@ -6,9 +6,9 @@ import java.util.Optional;
 
 public interface GameService {
 
-    Game createGame(long playerId);
+    Game createGame(String playerId);
 
-    Optional<Game> connectToGame(long gameId, long playerId);
+    Optional<Game> connectToGame(long gameId, String playerId);
 
-    Optional<Game> makeMove(long gameId, long playerId, int pitIndex);
+    Optional<Game> makeMove(long gameId, String playerId, int pitIndex);
 }

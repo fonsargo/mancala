@@ -1,44 +1,55 @@
 package com.bol.mancala.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.experimental.Accessors;
+import org.springframework.data.annotation.Id;
 
-import java.util.List;
-import java.util.Random;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 @Data
-@Accessors(chain = true)
+@AllArgsConstructor
 public class Game {
 
+    @Id
     private Long id;
-    private GameStatus status = GameStatus.NEW;
+    private GameStatus status;
+    private Board board;
+    private Map<PlayerTurn, String> players;
 
+    public Game() {
+        this.status = GameStatus.NEW;
+        this.board = new Board();
+        this.players = new HashMap<>();
+    }
 
-    public Game addFirstPlayer(long playerId) {
+    public void addPlayer(String playerId) {
         if (status != GameStatus.NEW) {
             throw new IllegalArgumentException("Can't add player to game in status: " + status);
         }
 
-//        Board playerBoard = new Board(
-//                ,
-//                0
-//        );
-//        playerBoards.put(playerId, playerBoard);
-//        if (playerBoards.size() == MAX_PLAYERS) {
-//            status = GameStatus.IN_PROGRESS;
-//            playerTurnId = playerBoards.keySet().stream().skip(random.nextInt(MAX_PLAYERS)).findFirst().orElse(playerId);
-//        }
-        return this;
+        if (players.size() == 0) {
+            players.put(PlayerTurn.FIRST_PLAYER, playerId);
+        } else {
+            players.put(PlayerTurn.SECOND_PLAYER, playerId);
+            status = GameStatus.IN_PROGRESS;
+        }
     }
 
-    public Game makeMove() {
+
+    public void makeMove(String playerId, int pitIndex) {
         if (status != GameStatus.IN_PROGRESS) {
             throw new IllegalArgumentException("Can't make move, game in status: " + status);
         }
-        return this;
+
+        PlayerTurn playerTurn = players.entrySet().stream()
+                .filter(entry -> Objects.equals(entry.getValue(), playerId))
+                .findFirst()
+                .map(Map.Entry::getKey)
+                .orElseThrow(() -> new IllegalArgumentException("Player with ID: " + playerId + " doesn't participate in game with id: " + id));
+
+        board.makeMove(playerTurn, pitIndex);
     }
 
 }

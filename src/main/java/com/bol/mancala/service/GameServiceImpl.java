@@ -5,34 +5,38 @@ import com.bol.mancala.repository.GameRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.Random;
 
 @Service
 public class GameServiceImpl implements GameService {
 
     private final GameRepository gameRepository;
-    private final Random random = new Random();
 
     public GameServiceImpl(GameRepository gameRepository) {
         this.gameRepository = gameRepository;
     }
 
     @Override
-    public Game createGame(long playerId) {
+    public Game createGame(String playerId) {
         Game game = new Game();
-//        game.addPlayer(playerId);
-        gameRepository.save(game);
-        return game;
+        game.addPlayer(playerId);
+        return gameRepository.save(game);
     }
 
     @Override
-    public Optional<Game> connectToGame(long gameId, long playerId) {
-        return gameRepository.findById(gameId);
-//                .map(game -> game.addPlayer(playerId));
+    public Optional<Game> connectToGame(long gameId, String playerId) {
+        return gameRepository.findById(gameId)
+                .map(game -> {
+                    game.addPlayer(playerId);
+                    return gameRepository.save(game);
+                });
     }
 
     @Override
-    public Optional<Game> makeMove(long gameId, long playerId, int pitIndex) {
-        return gameRepository.findById(gameId);
+    public Optional<Game> makeMove(long gameId, String playerId, int pitIndex) {
+        return gameRepository.findById(gameId)
+                .map(game -> {
+                    game.makeMove(playerId, pitIndex);
+                    return gameRepository.save(game);
+                });
     }
 }

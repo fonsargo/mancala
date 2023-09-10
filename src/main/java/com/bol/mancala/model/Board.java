@@ -1,8 +1,8 @@
 package com.bol.mancala.model;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.List;
@@ -11,19 +11,27 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @AllArgsConstructor
-@NoArgsConstructor
 @Getter
+@EqualsAndHashCode
 @ToString
 public class Board {
 
     public static final int PITS_COUNT = 6;
     public static final int INITIAL_STONES_COUNT = 6;
 
-    private List<Integer> firstPlayerPits = IntStream.range(0, PITS_COUNT).map(operand -> INITIAL_STONES_COUNT).boxed().collect(Collectors.toList());
-    private Integer firstPlayerLargePit = 0;
-    private List<Integer> secondPlayerPits = IntStream.range(0, PITS_COUNT).map(operand -> INITIAL_STONES_COUNT).boxed().collect(Collectors.toList());;
-    private Integer secondPlayerLargePit = 0;
-    private PlayerTurn playerTurn = PlayerTurn.FIRST_PLAYER;
+    private List<Integer> firstPlayerPits;
+    private Integer firstPlayerLargePit;
+    private List<Integer> secondPlayerPits;
+    private Integer secondPlayerLargePit;
+    private PlayerTurn playerTurn;
+
+    public Board() {
+        this.firstPlayerPits = IntStream.range(0, PITS_COUNT).map(operand -> INITIAL_STONES_COUNT).boxed().collect(Collectors.toList());
+        this.firstPlayerLargePit = 0;
+        this.secondPlayerPits = IntStream.range(0, PITS_COUNT).map(operand -> INITIAL_STONES_COUNT).boxed().collect(Collectors.toList());;
+        this.secondPlayerLargePit = 0;
+        this.playerTurn = PlayerTurn.FIRST_PLAYER;
+    }
 
     public void makeMove(PlayerTurn player, int pitIndex) {
         if (player != playerTurn) {
