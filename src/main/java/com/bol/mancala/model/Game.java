@@ -2,13 +2,11 @@ package com.bol.mancala.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class Game {
 
@@ -16,25 +14,22 @@ public class Game {
     private Long id;
     private GameStatus status;
     private Board board;
-    private Map<PlayerTurn, String> players;
+    private String firstPlayerId;
+    private String secondPlayerId;
 
-    public Game() {
+    public Game(String firstPlayerId) {
         this.status = GameStatus.NEW;
         this.board = new Board();
-        this.players = new HashMap<>();
+        this.firstPlayerId = firstPlayerId;
     }
 
-    public void addPlayer(String playerId) {
+    public void addSecondPlayer(String playerId) {
         if (status != GameStatus.NEW) {
             throw new IllegalArgumentException("Can't add player to game in status: " + status);
         }
 
-        if (players.size() == 0) {
-            players.put(PlayerTurn.FIRST_PLAYER, playerId);
-        } else {
-            players.put(PlayerTurn.SECOND_PLAYER, playerId);
-            status = GameStatus.IN_PROGRESS;
-        }
+        secondPlayerId = playerId;
+        status = GameStatus.IN_PROGRESS;
     }
 
 
@@ -43,11 +38,11 @@ public class Game {
             throw new IllegalArgumentException("Can't make move, game in status: " + status);
         }
 
-        PlayerTurn playerTurn = players.entrySet().stream()
-                .filter(entry -> Objects.equals(entry.getValue(), playerId))
-                .findFirst()
-                .map(Map.Entry::getKey)
-                .orElseThrow(() -> new IllegalArgumentException("Player with ID: " + playerId + " doesn't participate in game with id: " + id));
+        if (!firstPlayerId.equals(playerId) && !secondPlayerId.equals(playerId)) {
+            throw new IllegalArgumentException("Player with ID: " + playerId + " doesn't participate in game with id: " + id);
+        }
+
+        PlayerTurn playerTurn = firstPlayerId.equals(playerId) ? PlayerTurn.FIRST_PLAYER : PlayerTurn.SECOND_PLAYER;
 
         board.makeMove(playerTurn, pitIndex);
         if (board.getWinner() != null) {

@@ -7,12 +7,10 @@ import com.bol.mancala.model.PlayerTurn;
 import com.bol.mancala.model.WinnerType;
 import com.bol.mancala.repository.GameRepository;
 import org.assertj.core.util.Lists;
-import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,7 +25,7 @@ public class GameServiceTest {
     void shouldCreateGame() {
         String playerId = UUID.randomUUID().toString();
 
-        Game expected = new Game(null, GameStatus.NEW, new Board(), Map.of(PlayerTurn.FIRST_PLAYER, playerId));
+        Game expected = new Game(null, GameStatus.NEW, new Board(), playerId, null);
         gameService.createGame(playerId);
         Mockito.verify(gameRepository).save(eq(expected));
     }
@@ -37,13 +35,12 @@ public class GameServiceTest {
         long gameId = 1L;
         String player1Id = UUID.randomUUID().toString();
         String player2Id = UUID.randomUUID().toString();
-        Game storedGame = new Game(gameId, GameStatus.NEW, new Board(), Maps.newHashMap(PlayerTurn.FIRST_PLAYER, player1Id));
+        Game storedGame = new Game(gameId, GameStatus.NEW, new Board(), player1Id, null);
         Mockito.when(gameRepository.findById(Mockito.eq(gameId))).thenReturn(Optional.of(storedGame));
 
         gameService.connectToGame(gameId, player2Id);
 
-        Game expected = new Game(gameId, GameStatus.IN_PROGRESS, new Board(),
-                Map.of(PlayerTurn.FIRST_PLAYER, player1Id, PlayerTurn.SECOND_PLAYER, player2Id));
+        Game expected = new Game(gameId, GameStatus.IN_PROGRESS, new Board(), player1Id, player2Id);
         Mockito.verify(gameRepository).save(eq(expected));
     }
 
@@ -52,8 +49,7 @@ public class GameServiceTest {
         long gameId = 1L;
         String player1Id = UUID.randomUUID().toString();
         String player2Id = UUID.randomUUID().toString();
-        Game storedGame = new Game(gameId, GameStatus.IN_PROGRESS, new Board(),
-                Map.of(PlayerTurn.FIRST_PLAYER, player1Id, PlayerTurn.SECOND_PLAYER, player2Id));
+        Game storedGame = new Game(gameId, GameStatus.IN_PROGRESS, new Board(), player1Id, player2Id);
         Mockito.when(gameRepository.findById(Mockito.eq(gameId))).thenReturn(Optional.of(storedGame));
 
         gameService.makeMove(gameId, player1Id, 1);
@@ -65,8 +61,7 @@ public class GameServiceTest {
                 0,
                 PlayerTurn.SECOND_PLAYER,
                 null);
-        Game expected = new Game(gameId, GameStatus.IN_PROGRESS, expectedBoard,
-                Map.of(PlayerTurn.FIRST_PLAYER, player1Id, PlayerTurn.SECOND_PLAYER, player2Id));
+        Game expected = new Game(gameId, GameStatus.IN_PROGRESS, expectedBoard, player1Id, player2Id);
         Mockito.verify(gameRepository).save(eq(expected));
     }
 
@@ -82,8 +77,7 @@ public class GameServiceTest {
                 30,
                 PlayerTurn.FIRST_PLAYER,
                 null);
-        Game storedGame = new Game(gameId, GameStatus.IN_PROGRESS, board,
-                Map.of(PlayerTurn.FIRST_PLAYER, player1Id, PlayerTurn.SECOND_PLAYER, player2Id));
+        Game storedGame = new Game(gameId, GameStatus.IN_PROGRESS, board, player1Id, player2Id);
         Mockito.when(gameRepository.findById(Mockito.eq(gameId))).thenReturn(Optional.of(storedGame));
 
         gameService.makeMove(gameId, player1Id, 5);
@@ -95,8 +89,7 @@ public class GameServiceTest {
                 66,
                 PlayerTurn.SECOND_PLAYER,
                 WinnerType.SECOND_PLAYER);
-        Game expected = new Game(gameId, GameStatus.FINISHED, expectedBoard,
-                Map.of(PlayerTurn.FIRST_PLAYER, player1Id, PlayerTurn.SECOND_PLAYER, player2Id));
+        Game expected = new Game(gameId, GameStatus.FINISHED, expectedBoard,player1Id, player2Id);
         Mockito.verify(gameRepository).save(eq(expected));
     }
 }

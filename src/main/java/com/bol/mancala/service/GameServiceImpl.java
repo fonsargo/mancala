@@ -17,8 +17,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public Game createGame(String playerId) {
-        Game game = new Game();
-        game.addPlayer(playerId);
+        Game game = new Game(playerId);
         return gameRepository.save(game);
     }
 
@@ -26,7 +25,7 @@ public class GameServiceImpl implements GameService {
     public Optional<Game> connectToGame(long gameId, String playerId) {
         return gameRepository.findById(gameId)
                 .map(game -> {
-                    game.addPlayer(playerId);
+                    game.addSecondPlayer(playerId);
                     return gameRepository.save(game);
                 });
     }
