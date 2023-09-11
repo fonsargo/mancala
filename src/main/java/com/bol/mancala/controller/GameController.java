@@ -5,6 +5,7 @@ import com.bol.mancala.model.Game;
 import com.bol.mancala.model.Player;
 import com.bol.mancala.service.GameService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,9 +26,11 @@ public class GameController {
     private static final String PLAYER_ATTRIBUTE = "player";
 
     private final GameService gameService;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public GameController(GameService gameService) {
+    public GameController(GameService gameService, SimpMessagingTemplate messagingTemplate) {
         this.gameService = gameService;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @PostMapping("/create")
@@ -45,7 +48,7 @@ public class GameController {
         Player player = new Player(session.getId(), name);
         session.setAttribute(PLAYER_ATTRIBUTE, player);
         Optional<Game> gameOptional = gameService.connectToGame(gameId, player.getSessionId());
-        //TODO send websocket
+        gameOptional.ifPresent(game -> messagingTemplate.convertAndSend("/topic/game/" + gameId, game));
         return ResponseEntity.of(gameOptional);
     }
 
@@ -56,7 +59,7 @@ public class GameController {
             return ResponseEntity.badRequest().build();
         }
         Optional<Game> gameOptional = gameService.makeMove(gameId, player.getSessionId(), pitIndex);
-        //TODO send websocket
+        gameOptional.ifPresent(game -> messagingTemplate.convertAndSend("/topic/game/" + gameId, game));
         return ResponseEntity.of(gameOptional);
     }
 
