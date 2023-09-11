@@ -13,7 +13,7 @@ var gameId;
                 .done(function (game) {
                     isFirstPlayer = true;
                     startGame(createButton, connectButton, game);
-                    alert("Successfully created game with id: " + game.id + ". Send this ID to your opponent!");
+                    setMessage("Successfully created game with id: " + game.id + ". Send this ID to your opponent and wait...", true);
                 })
                 .fail(function (error) {
                     console.log(error);
@@ -35,7 +35,7 @@ var gameId;
                     isFirstPlayer = false;
                     updateBoard(game.board.secondPlayerPits, game.board.secondPlayerLargePit, game.board.firstPlayerPits, game.board.firstPlayerLargePit);
                     startGame(createButton, connectButton, game);
-                    alert("Successfully connected to game with id: " + game.id + "!");
+                    setMessage("Successfully connected to game! Waiting for your opponent's turn...", true);
                 })
                 .fail(function (error) {
                     console.log(error);
@@ -95,6 +95,17 @@ function startGame(createButton, connectButton, game) {
     connectWebSocket();
 }
 
+function setMessage(message, isWaiting) {
+    var messageElement = document.getElementById("message");
+    messageElement.innerHTML = message;
+    var progressBar = document.getElementById("progress");
+    if (isWaiting) {
+        progressBar.style.visibility = 'visible';
+    } else {
+        progressBar.style.visibility = 'hidden';
+    }
+}
+
 function connectWebSocket() {
     var socket = new SockJS('/websocket');
     var stompClient = Stomp.over(socket);
@@ -110,10 +121,24 @@ var stompSuccessCallback = function (stompClient, frame) {
         } else {
             updateBoard(game.board.secondPlayerPits, game.board.secondPlayerLargePit, game.board.firstPlayerPits, game.board.firstPlayerLargePit);
         }
+        var winner = game.board.winner;
+        if (winner) {
+            if (isFirstPlayer && winner === 'FIRST_PLAYER' || !isFirstPlayer && winner === 'SECOND_PLAYER') {
+                setMessage("Congratulations, you win!")
+            } else if (winner === 'DRAW') {
+                setMessage("Draw result!")
+            } else {
+                setMessage("Unfortunately, you lose!")
+            }
+            return;
+        }
+
         var playerTurn = game.board.playerTurn;
         if (isFirstPlayer && playerTurn === 'FIRST_PLAYER' || !isFirstPlayer && playerTurn !== 'FIRST_PLAYER') {
-            alert("Now it's your turn!");
+            setMessage("Now it's your turn!");
             changePitsStatus();
+        } else {
+            setMessage("Waiting for your opponent's turn...", true)
         }
     });
 }
