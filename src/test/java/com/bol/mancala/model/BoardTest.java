@@ -1,5 +1,6 @@
 package com.bol.mancala.model;
 
+import com.bol.mancala.TestUtils;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +15,7 @@ public class BoardTest {
         Board board = new Board();
         board.makeMove(PlayerTurn.FIRST_PLAYER, 1);
 
-        Board expected = new Board(
+        Board expected = TestUtils.createBoard(
                 List.of(6, 0, 7, 7, 7, 7),
                 1,
                 List.of(7, 6, 6, 6, 6, 6),
@@ -29,7 +30,7 @@ public class BoardTest {
         Board board = new Board();
         board.makeMove(PlayerTurn.FIRST_PLAYER, 0);
 
-        Board expected = new Board(
+        Board expected = TestUtils.createBoard(
                 List.of(0, 7, 7, 7, 7, 7),
                 1,
                 List.of(6, 6, 6, 6, 6, 6),
@@ -41,7 +42,7 @@ public class BoardTest {
 
     @Test
     void shouldMakeCapture() {
-        Board board = new Board(
+        Board board = TestUtils.createBoard(
                 Lists.newArrayList(0, 2, 0, 0, 0, 0),
                 0,
                 Lists.newArrayList(0, 0, 5, 3, 0, 0),
@@ -50,7 +51,7 @@ public class BoardTest {
                 null);
         board.makeMove(PlayerTurn.FIRST_PLAYER, 1);
 
-        Board expected = new Board(
+        Board expected = TestUtils.createBoard(
                 List.of(0, 0, 1, 0, 0, 0),
                 6,
                 List.of(0, 0, 0, 3, 0, 0),
@@ -62,7 +63,7 @@ public class BoardTest {
 
     @Test
     void shouldRepeatAroundTheBoardIfMoreThan12Stones() {
-        Board board = new Board(
+        Board board = TestUtils.createBoard(
                 Lists.newArrayList(14, 5, 3, 2, 7, 0),
                 4,
                 Lists.newArrayList(4, 2, 5, 0, 8, 0),
@@ -71,7 +72,7 @@ public class BoardTest {
                 null);
         board.makeMove(PlayerTurn.FIRST_PLAYER, 0);
 
-        Board expected = new Board(
+        Board expected = TestUtils.createBoard(
                 List.of(1, 7, 4, 3, 8, 1),
                 5,
                 List.of(5, 3, 6, 1, 9, 1),
@@ -83,7 +84,7 @@ public class BoardTest {
 
     @Test
     void shouldRepeatAroundTheBoardAndCapture() {
-        Board board = new Board(
+        Board board = TestUtils.createBoard(
                 Lists.newArrayList(13, 5, 3, 2, 7, 0),
                 4,
                 Lists.newArrayList(4, 2, 5, 0, 8, 0),
@@ -92,7 +93,7 @@ public class BoardTest {
                 null);
         board.makeMove(PlayerTurn.FIRST_PLAYER, 0);
 
-        Board expected = new Board(
+        Board expected = TestUtils.createBoard(
                 List.of(0, 6, 4, 3, 8, 1),
                 7,
                 List.of(5, 3, 6, 1, 9, 0),
@@ -104,7 +105,7 @@ public class BoardTest {
 
     @Test
     void shouldFinishGame() {
-        Board board = new Board(
+        Board board = TestUtils.createBoard(
                 Lists.newArrayList(2, 5, 0, 2, 7, 0),
                 40,
                 Lists.newArrayList(0, 0, 0, 0, 0, 5),
@@ -113,13 +114,13 @@ public class BoardTest {
                 null);
         board.makeMove(PlayerTurn.SECOND_PLAYER, 5);
 
-        Board expected = new Board(
+        Board expected = TestUtils.createBoard(
                 List.of(0, 0, 0, 0, 0, 0),
                 60,
                 List.of(0, 0, 0, 0, 0, 0),
                 31,
                 PlayerTurn.FIRST_PLAYER,
-                WinnerType.FIRST_PLAYER
+                GameResult.WIN
                 );
         assertThat(board).isEqualTo(expected);
     }

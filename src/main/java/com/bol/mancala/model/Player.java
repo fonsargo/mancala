@@ -1,9 +1,10 @@
 package com.bol.mancala.model;
 
 import lombok.Data;
-import lombok.experimental.Accessors;
 
+//TODO
 @Data
 public class Player {
+    private final String sessionId;
     private final String name;
 }

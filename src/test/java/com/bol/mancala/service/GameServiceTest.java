@@ -1,10 +1,11 @@
 package com.bol.mancala.service;
 
+import com.bol.mancala.TestUtils;
 import com.bol.mancala.model.Board;
 import com.bol.mancala.model.Game;
 import com.bol.mancala.model.GameStatus;
 import com.bol.mancala.model.PlayerTurn;
-import com.bol.mancala.model.WinnerType;
+import com.bol.mancala.model.GameResult;
 import com.bol.mancala.repository.GameRepository;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ public class GameServiceTest {
         String player1Id = UUID.randomUUID().toString();
         String player2Id = UUID.randomUUID().toString();
         Game storedGame = new Game(gameId, GameStatus.NEW, new Board(), player1Id, null);
-        Mockito.when(gameRepository.findById(Mockito.eq(gameId))).thenReturn(Optional.of(storedGame));
+        Mockito.when(gameRepository.findById(eq(gameId))).thenReturn(Optional.of(storedGame));
 
         gameService.connectToGame(gameId, player2Id);
 
@@ -54,7 +55,7 @@ public class GameServiceTest {
 
         gameService.makeMove(gameId, player1Id, 1);
 
-        Board expectedBoard = new Board(
+        Board expectedBoard = TestUtils.createBoard(
                 List.of(6, 0, 7, 7, 7, 7),
                 1,
                 List.of(7, 6, 6, 6, 6, 6),
@@ -70,7 +71,7 @@ public class GameServiceTest {
         long gameId = 1L;
         String player1Id = UUID.randomUUID().toString();
         String player2Id = UUID.randomUUID().toString();
-        Board board = new Board(
+        Board board = TestUtils.createBoard(
                 Lists.newArrayList(0, 0, 0, 0, 0, 8),
                 55,
                 Lists.newArrayList(7, 6, 6, 6, 6, 6),
@@ -82,13 +83,13 @@ public class GameServiceTest {
 
         gameService.makeMove(gameId, player1Id, 5);
 
-        Board expectedBoard = new Board(
+        Board expectedBoard = TestUtils.createBoard(
                 List.of(0, 0, 0, 0, 0, 0),
                 64,
                 List.of(0, 0, 0, 0, 0, 0),
                 66,
                 PlayerTurn.SECOND_PLAYER,
-                WinnerType.SECOND_PLAYER);
+                GameResult.LOSE);
         Game expected = new Game(gameId, GameStatus.FINISHED, expectedBoard,player1Id, player2Id);
         Mockito.verify(gameRepository).save(eq(expected));
     }
