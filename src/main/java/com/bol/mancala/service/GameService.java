@@ -1,14 +1,15 @@
 package com.bol.mancala.service;
 
-import com.bol.mancala.model.Game;
+
+import com.bol.mancala.dto.GameDto;
 
 import java.util.Optional;
 
 public interface GameService {
 
-    Game createGame(String playerId);
+    GameDto createGame(String playerId);
 
-    Optional<Game> connectToGame(long gameId, String playerId);
+    Optional<GameDto> connectToGame(long gameId, String playerId);
 
-    Optional<Game> makeMove(long gameId, String playerId, int pitIndex);
+    Optional<GameDto> makeMove(long gameId, String playerId, int pitIndex);
 }

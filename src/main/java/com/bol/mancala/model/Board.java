@@ -23,7 +23,7 @@ public class Board {
     private int myLargePit;
     private List<Integer> opponentPits;
     private int opponentLargePit;
-    private boolean repeatTurn;
+    private boolean repeatTurn = false;
     private GameResult result;
 
     public Board() {
@@ -31,7 +31,6 @@ public class Board {
         this.myLargePit = 0;
         this.opponentPits = IntStream.range(0, PITS_COUNT).map(operand -> INITIAL_STONES_COUNT).boxed().collect(Collectors.toList());
         this.opponentLargePit = 0;
-        this.repeatTurn = false;
     }
 
     public Board(List<Integer> myPits, int myLargePit, List<Integer> opponentPits, int opponentLargePit) {
@@ -41,14 +40,13 @@ public class Board {
         this.opponentLargePit = opponentLargePit;
     }
 
-    public void makeMove(int pitIndex) {
+    public Board makeMove(int pitIndex) {
         Integer stones = myPits.set(pitIndex, 0);
         if (stones == 0) {
             //todo throw
             throw new IllegalArgumentException("Can't make move: pit with index: " + pitIndex + " is empty");
         }
 
-        boolean repeat = false;
         int startIndex = pitIndex + 1;
         while (stones > 0) {
             stones = sowToMy(startIndex, stones);
@@ -59,18 +57,18 @@ public class Board {
                 stones--;
                 if (stones == 0) {
                     // keep player turn
-                    repeat = true;
+                    repeatTurn = true;
                 }
             }
 
             stones = sowToOpponent(stones);
         }
 
-        repeatTurn = repeat;
         checkFinished();
+        return this;
     }
 
-    public boolean isOver() {
+    public boolean isGameOver() {
         return result != null;
     }
 

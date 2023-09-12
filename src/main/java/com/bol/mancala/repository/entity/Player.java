@@ -1,4 +1,4 @@
-package com.bol.mancala.model;
+package com.bol.mancala.repository.entity;
 
 import lombok.Data;
 
