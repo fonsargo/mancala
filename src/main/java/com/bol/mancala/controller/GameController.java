@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import java.util.UUID;
@@ -20,6 +21,9 @@ import java.util.UUID;
 @Controller
 @RequestMapping("/game")
 public class GameController {
+
+    private static final String GAME_ID = "gameId";
+    private static final String GAME = "game";
 
     private final GameService gameService;
 
@@ -45,15 +49,15 @@ public class GameController {
     public String getGame(@PathVariable("gameId") UUID gameId, HttpSession session, Model model) {
         String sessionId = session.getId();
         GameDto gameDto = gameService.loadGame(gameId, sessionId);
-        model.addAttribute("gameId", gameId);
-        model.addAttribute("game", gameDto);
+        model.addAttribute(GAME_ID, gameId);
+        model.addAttribute(GAME, gameDto);
         return "game";
     }
 
     @PostMapping("/{gameId}/makeMove")
     @ResponseBody
     public void makeMove(@PathVariable("gameId") UUID gameId,
-                         @RequestParam @Min(0) @Max(BoardModel.PITS_COUNT - 1) Integer pitIndex,
+                         @RequestParam @Valid @Min(0) @Max(BoardModel.PITS_COUNT - 1) Integer pitIndex,
                          HttpSession session) {
         gameService.makeMove(gameId, session.getId(), pitIndex);
     }

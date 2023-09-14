@@ -18,21 +18,25 @@ import javax.servlet.http.HttpServletRequest;
 @Slf4j
 public class GlobalControllerAdvice {
 
+    private static final String STATUS = "status";
+    private static final String MESSAGE = "message";
+    private static final String ERROR_VIEW = "error";
+
     @ExceptionHandler(GameNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ModelAndView handleNotFoundError(Exception ex) {
-        ModelAndView mav = new ModelAndView("error");
-        mav.addObject("message", ex.getMessage());
-        mav.addObject("status", HttpStatus.NOT_FOUND);
+        ModelAndView mav = new ModelAndView(ERROR_VIEW);
+        mav.addObject(MESSAGE, ex.getMessage());
+        mav.addObject(STATUS, HttpStatus.NOT_FOUND);
         return mav;
     }
 
     @ExceptionHandler(ForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ModelAndView handleForbiddenError(Exception ex) {
-        ModelAndView mav = new ModelAndView("error");
-        mav.addObject("message", ex.getMessage());
-        mav.addObject("status", HttpStatus.FORBIDDEN);
+        ModelAndView mav = new ModelAndView(ERROR_VIEW);
+        mav.addObject(MESSAGE, ex.getMessage());
+        mav.addObject(STATUS, HttpStatus.FORBIDDEN);
         return mav;
     }
 
@@ -47,9 +51,9 @@ public class GlobalControllerAdvice {
     public ModelAndView handleError(HttpServletRequest req, Exception ex) {
         log.error("Request: " + req.getRequestURL() + " raised " + ex);
 
-        ModelAndView mav = new ModelAndView("error");
-        mav.addObject("message", ex.getMessage());
-        mav.addObject("status", HttpStatus.INTERNAL_SERVER_ERROR);
+        ModelAndView mav = new ModelAndView(ERROR_VIEW);
+        mav.addObject(MESSAGE, ex.getMessage());
+        mav.addObject(STATUS, HttpStatus.INTERNAL_SERVER_ERROR);
         return mav;
     }
 }

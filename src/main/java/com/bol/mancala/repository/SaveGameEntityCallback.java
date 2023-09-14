@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class SaveGameEntityCallback implements AfterSaveCallback<Game> {
 
+    public static final String TOPIC_GAME = "/topic/game/";
+
     private final SimpMessagingTemplate messagingTemplate;
 
     public SaveGameEntityCallback(SimpMessagingTemplate messagingTemplate) {
@@ -21,7 +23,7 @@ public class SaveGameEntityCallback implements AfterSaveCallback<Game> {
         Board board = aggregate.getBoard();
         if (board != null) {
             BoardDto boardDto = BoardDto.fromBoard(board);
-            messagingTemplate.convertAndSend("/topic/game/" + aggregate.getId(), boardDto);
+            messagingTemplate.convertAndSend(TOPIC_GAME + aggregate.getId(), boardDto);
         }
         return aggregate;
     }
