@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <title>Mancala Game</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="/css/game/mancala.css"/>
+</head>
+
+<body>
+<h1>Mancala</h1>
+<form method="POST" action="/game/create" class="form">
+    <input type="submit" class="button" id="createButton" value="Create game">
+</form>
+
+<div class="board">
+    <div class="player-two store">0</div>
+
+    <div class="rows">
+        <div class="row player-two">
+            <div class="pit">0</div>
+            <div class="pit">0</div>
+            <div class="pit">0</div>
+            <div class="pit">0</div>
+            <div class="pit">0</div>
+            <div class="pit">0</div>
+        </div>
+
+        <div class="row player-one">
+            <div class="pit">0</div>
+            <div class="pit">0</div>
+            <div class="pit">0</div>
+            <div class="pit">0</div>
+            <div class="pit">0</div>
+            <div class="pit">0</div>
+        </div>
+    </div>
+
+    <div class="player-one store">0</div>
+</div>
+</body>
+</html>
