@@ -61,21 +61,22 @@ h1 {
 .pit {
     flex: 1;
     border-radius: 40%;
+    color: #2b2e30;
+    pointer-events:none;
 }
 
-.player-one-enabled .pit {
+.player-one .pit-enabled {
     cursor: pointer;
     pointer-events:auto;
     color: blue;
 }
 
-.store.player-two, .player-two .pit {
+.store.player-two {
     color: #2b2e30;
 }
 
-.store.player-one, .player-one .pit {
+.store.player-one {
     color: #2b2e30;
-    pointer-events:none;
 }
 
 .input {

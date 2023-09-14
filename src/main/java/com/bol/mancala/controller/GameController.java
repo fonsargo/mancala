@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import java.util.Optional;
 import java.util.UUID;
 
 @Controller
@@ -38,16 +37,14 @@ public class GameController {
     @GetMapping("/{gameId}/connect")
     public String connect(@PathVariable("gameId") UUID gameId, HttpSession session) {
         String sessionId = session.getId();
-        //TODO
-        Optional<UUID> uuid = gameService.connectToGame(gameId, sessionId);
+        gameService.connectToGame(gameId, sessionId);
         return "redirect:/game/" + gameId;
     }
 
     @GetMapping("/{gameId}")
     public String getGame(@PathVariable("gameId") UUID gameId, HttpSession session, Model model) {
         String sessionId = session.getId();
-        //TODO
-        GameDto gameDto = gameService.loadGame(gameId, sessionId).get();
+        GameDto gameDto = gameService.loadGame(gameId, sessionId);
         model.addAttribute("gameId", gameId);
         model.addAttribute("game", gameDto);
         return "game";

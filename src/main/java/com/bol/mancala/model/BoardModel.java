@@ -49,10 +49,6 @@ public class BoardModel {
         checkFinished();
     }
 
-    public boolean isGameOver() {
-        return result != null;
-    }
-
     /**
      * Make move from pit index in current player's half of board.
      *

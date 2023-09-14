@@ -25,4 +25,8 @@ public class Board {
         return new Board(model.getFirstPlayerHalf().getPits(), model.getFirstPlayerHalf().getLargePit(),
                 model.getSecondPlayerHalf().getPits(), model.getSecondPlayerHalf().getLargePit(), model.getPlayerTurn(), model.getResult());
     }
+
+    public boolean isGameOver() {
+        return result != null;
+    }
 }

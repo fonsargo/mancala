@@ -8,10 +8,12 @@ import com.bol.mancala.repository.GameRepository;
 import com.bol.mancala.repository.entity.Board;
 import com.bol.mancala.repository.entity.Game;
 import com.bol.mancala.repository.entity.GameStatus;
+import com.bol.mancala.service.exception.ForbiddenException;
+import com.bol.mancala.service.exception.GameLogicException;
+import com.bol.mancala.service.exception.GameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -27,70 +29,62 @@ public class GameServiceImpl implements GameService {
     public UUID createGame(String playerId) {
         Game game = new Game()
                 .setStatus(GameStatus.NEW)
-                .setFirstPlayerId(playerId);
+                .setFirstPlayerId(playerId)
+                .setBoard(Board.fromBoardModel(new BoardModel()));
         game = gameRepository.save(game);
         return game.getId();
     }
 
     @Override
-    public Optional<UUID> connectToGame(UUID gameId, String playerId) {
-        return gameRepository.findById(gameId).map(game -> {
-                    if (game.getStatus() != GameStatus.NEW) {
-                        throw new IllegalArgumentException("Can't connect to already started game");
-                    }
-                    if (Objects.equals(game.getFirstPlayerId(), playerId)) {
-                        throw new IllegalArgumentException("You are already connected to this game!");
-                    }
-                    game.setSecondPlayerId(playerId);
-                    game.setStatus(GameStatus.IN_PROGRESS);
-                    BoardModel boardModel = new BoardModel();
-                    Board board = Board.fromBoardModel(boardModel);
-                    game.setBoard(board);
-                    gameRepository.save(game);
-                    return gameId;
-                }
-        );
+    public void connectToGame(UUID gameId, String playerId) {
+        Game game = gameRepository.findById(gameId).orElseThrow(() -> new GameNotFoundException(gameId));
+        if (game.getStatus() == GameStatus.NEW
+                && !Objects.equals(game.getFirstPlayerId(), playerId)
+                && game.getSecondPlayerId() == null) {
+            game.setSecondPlayerId(playerId);
+            game.setStatus(GameStatus.IN_PROGRESS);
+            gameRepository.save(game);
+        }
     }
 
     @Override
-    public Optional<GameDto> loadGame(UUID gameId, String playerId) {
-        return gameRepository.findById(gameId)
-                .map(game -> {
-                    if (!Objects.equals(game.getFirstPlayerId(), playerId) && !Objects.equals(game.getSecondPlayerId(), playerId)) {
-                        throw new IllegalArgumentException("Player with ID: " + playerId + " doesn't participate in game with id: " + gameId);
-                    }
-                    boolean isFirstPlayer = Objects.equals(game.getFirstPlayerId(), playerId);
-                    BoardDto board = game.getBoard() != null ? BoardDto.fromBoard(game.getBoard()) : null;
-                    return new GameDto(board, isFirstPlayer, game.getStatus());
-                });
+    public GameDto loadGame(UUID gameId, String playerId) {
+        Game game = gameRepository.findById(gameId).orElseThrow(() -> new GameNotFoundException(gameId));
+        checkAccessRights(playerId, game);
+
+        boolean isFirstPlayer = Objects.equals(game.getFirstPlayerId(), playerId);
+        BoardDto board = BoardDto.fromBoard(game.getBoard());
+        return new GameDto(board, isFirstPlayer, game.getStatus());
     }
 
     @Override
     public void makeMove(UUID gameId, String playerId, int pitIndex) {
-        //todo
-        Game game = gameRepository.findById(gameId).orElseThrow();
-        if (!game.getFirstPlayerId().equals(playerId) && !game.getSecondPlayerId().equals(playerId)) {
-            throw new IllegalArgumentException("Player with ID: " + playerId + " doesn't participate in game with id: " + gameId);
-        }
+        Game game = gameRepository.findById(gameId).orElseThrow(() -> new GameNotFoundException(gameId));
+        checkAccessRights(playerId, game);
 
         if (game.getStatus() != GameStatus.IN_PROGRESS) {
-            throw new IllegalArgumentException("Can't make move, game in status: " + game.getStatus());
+            throw new GameLogicException("Can't make move, game in status: " + game.getStatus());
         }
 
         Board board = game.getBoard();
-        if (board == null) {
-            throw new IllegalArgumentException("Game is not started yet!");
-        }
-
         PlayerTurn playerTurn = game.getFirstPlayerId().equals(playerId) ? PlayerTurn.FIRST_PLAYER : PlayerTurn.SECOND_PLAYER;
         if (board.getPlayerTurn() != playerTurn) {
-            throw new IllegalArgumentException("Can't make move, it's not your turn. Next player is: " + playerTurn);
+            throw new GameLogicException("Can't make move, it's not your turn. Next player is: " + board.getPlayerTurn());
         }
 
         BoardModel boardModel = BoardModel.fromBoard(board);
         boardModel.makeMove(pitIndex);
         board = Board.fromBoardModel(boardModel);
         game.setBoard(board);
+        if (board.isGameOver()) {
+            game.setStatus(GameStatus.FINISHED);
+        }
         gameRepository.save(game);
+    }
+
+    private void checkAccessRights(String playerId, Game game) {
+        if (!Objects.equals(game.getFirstPlayerId(), playerId) && !Objects.equals(game.getSecondPlayerId(), playerId)) {
+            throw new ForbiddenException(playerId, game.getId());
+        }
     }
 }

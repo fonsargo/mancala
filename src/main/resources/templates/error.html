@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <title>Mancala Game</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="/css/game/mancala.css"/>
+</head>
+
+<body>
+<h1>Mancala</h1>
+<h1 th:if="${status}" th:text="${status}">Error Page</h1>
+
+<p th:if="${message}">
+    <b>Message:</b> <span th:text="${message}">status-code</span>
+</p>
+
+<a class="button" href="/">Go Home</a>
+</body>
+</html>
