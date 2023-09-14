@@ -1,15 +1,22 @@
 package com.bol.mancala;
 
+import com.bol.mancala.repository.entity.Game;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.relational.core.mapping.event.BeforeConvertCallback;
 
-import javax.sql.DataSource;
+import java.util.UUID;
 
 @Configuration
 public class DBConfiguration {
 
-//    @Bean
-//    public DataSource inMemoryDS() throws Exception {
-//        return EmbeddedPostgres.builder()
-//                .start().getPostgresDatabase();
-//    }
+    @Bean
+    BeforeConvertCallback<Game> beforeConvertCallback() {
+        return game -> {
+            if (game.getId() == null) {
+                game.setId(UUID.randomUUID());
+            }
+            return game;
+        };
+    }
 }
