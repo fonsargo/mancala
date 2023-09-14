@@ -22,18 +22,19 @@
     connectWebSocket(stompSuccessCallback, stompFailureCallback);
 })();
 
-function updateGame(game, status) {
-    if (isFirstPlayer) {
-        updateBoard(game.firstPlayerPits, game.firstPlayerLargePit, game.secondPlayerPits, game.secondPlayerLargePit);
-    } else {
-        updateBoard(game.secondPlayerPits, game.secondPlayerLargePit, game.firstPlayerPits, game.firstPlayerLargePit);
-    }
-
-    if (status === "NEW") {
+function updateGame(board, status) {
+    if (status === "NEW" || !board) {
         setMessage("Game was successfully created! Send this link to your opponent and wait...", true);
         return;
     }
-    var winner = game.result;
+
+    if (isFirstPlayer) {
+        updateBoard(board.firstPlayerPits, board.firstPlayerLargePit, board.secondPlayerPits, board.secondPlayerLargePit);
+    } else {
+        updateBoard(board.secondPlayerPits, board.secondPlayerLargePit, board.firstPlayerPits, board.firstPlayerLargePit);
+    }
+
+    var winner = board.result;
     if (winner) {
         if (isFirstPlayer && winner === 'FIRST_PLAYER' || !isFirstPlayer && winner === 'SECOND_PLAYER') {
             setMessage("Congratulations, you win!")
@@ -45,7 +46,7 @@ function updateGame(game, status) {
         return;
     }
 
-    var playerTurn = game.playerTurn;
+    var playerTurn = board.playerTurn;
     if (isFirstPlayer && playerTurn === 'FIRST_PLAYER' || !isFirstPlayer && playerTurn !== 'FIRST_PLAYER') {
         setMessage("Now it's your turn!");
         changePitsStatus();
@@ -72,9 +73,6 @@ function updateBoard(myPits, myLargePit, opponentPits, opponentLargePit) {
 function makeMove(i) {
     changePitsStatus();
     $.post("/game/" + gameId + "/makeMove", {pitIndex: i})
-        .done(function (result) {
-            //TODO
-        })
         .fail(function (error) {
             console.log(error);
             alert(error.responseJSON.message);

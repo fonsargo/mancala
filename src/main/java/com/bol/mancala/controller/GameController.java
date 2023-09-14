@@ -1,11 +1,8 @@
 package com.bol.mancala.controller;
 
 import com.bol.mancala.dto.GameDto;
-import com.bol.mancala.model.BoardHalf;
-import com.bol.mancala.repository.entity.Game;
+import com.bol.mancala.model.BoardModel;
 import com.bol.mancala.service.GameService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,11 +23,9 @@ import java.util.UUID;
 public class GameController {
 
     private final GameService gameService;
-    private final SimpMessagingTemplate messagingTemplate;
 
-    public GameController(GameService gameService, SimpMessagingTemplate messagingTemplate) {
+    public GameController(GameService gameService) {
         this.gameService = gameService;
-        this.messagingTemplate = messagingTemplate;
     }
 
     @PostMapping("/create")
@@ -43,35 +38,27 @@ public class GameController {
     @GetMapping("/{gameId}/connect")
     public String connect(@PathVariable("gameId") UUID gameId, HttpSession session) {
         String sessionId = session.getId();
-        Game game = gameService.connectToGame(gameId, sessionId);
-        GameDto gameDto = GameDto.fromGame(game);
-        messagingTemplate.convertAndSend("/topic/game/" + gameId, gameDto);
+        //TODO
+        Optional<UUID> uuid = gameService.connectToGame(gameId, sessionId);
         return "redirect:/game/" + gameId;
     }
 
     @GetMapping("/{gameId}")
     public String getGame(@PathVariable("gameId") UUID gameId, HttpSession session, Model model) {
         String sessionId = session.getId();
-        Game game = gameService.loadGame(gameId, sessionId);
-        if (game == null) {
-            return "redirect:/game/" + gameId + "/connect";
-        }
-        GameDto gameDto = GameDto.fromGame(game);
+        //TODO
+        GameDto gameDto = gameService.loadGame(gameId, sessionId).get();
+        model.addAttribute("gameId", gameId);
         model.addAttribute("game", gameDto);
-        model.addAttribute("isFirstPlayer", game.getFirstPlayerId().equals(sessionId));
-        model.addAttribute("status", game.getStatus());
         return "game";
     }
 
     @PostMapping("/{gameId}/makeMove")
     @ResponseBody
-    public ResponseEntity<GameDto> makeMove(@PathVariable("gameId") UUID gameId,
-                                            @RequestParam @Min(0) @Max(BoardHalf.PITS_COUNT - 1) Integer pitIndex,
-                                            HttpSession session) {
-        Optional<GameDto> gameOptional = gameService.makeMove(gameId, session.getId(), pitIndex)
-                .map(GameDto::fromGame);
-        gameOptional.ifPresent(game -> messagingTemplate.convertAndSend("/topic/game/" + gameId, game));
-        return ResponseEntity.of(gameOptional);
+    public void makeMove(@PathVariable("gameId") UUID gameId,
+                         @RequestParam @Min(0) @Max(BoardModel.PITS_COUNT - 1) Integer pitIndex,
+                         HttpSession session) {
+        gameService.makeMove(gameId, session.getId(), pitIndex);
     }
 
 }

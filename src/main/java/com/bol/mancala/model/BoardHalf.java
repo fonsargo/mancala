@@ -16,14 +16,14 @@ import java.util.stream.IntStream;
 @ToString
 public class BoardHalf {
 
-    public static final int PITS_COUNT = 6;
-    public static final int INITIAL_STONES_COUNT = 6;
-
     private List<Integer> pits;
     private int largePit;
 
     public BoardHalf() {
-        this.pits = IntStream.range(0, PITS_COUNT).map(operand -> INITIAL_STONES_COUNT).boxed().collect(Collectors.toList());
+        this.pits = IntStream.range(0, BoardModel.PITS_COUNT)
+                .map(operand -> BoardModel.INITIAL_STONES_COUNT)
+                .boxed()
+                .collect(Collectors.toList());
         this.largePit = 0;
     }
 
@@ -37,7 +37,7 @@ public class BoardHalf {
 
     public Integer sowToMy(Integer index, Integer stones, BoardHalf opponentHalf) {
         ListIterator<Integer> iterator = pits.listIterator(index);
-        ListIterator<Integer> oppositeIterator = opponentHalf.pits.listIterator(PITS_COUNT - index);
+        ListIterator<Integer> oppositeIterator = opponentHalf.pits.listIterator(BoardModel.PITS_COUNT - index);
         while (stones > 0 && iterator.hasNext()) {
             Integer currentStones = iterator.next();
             Integer oppositeStones = oppositeIterator.previous();

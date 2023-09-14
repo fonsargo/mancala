@@ -8,173 +8,180 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class BoardTest {
+public class BoardModelTest {
 
     @Test
     void shouldMakeSimpleMove() {
-        Board board = new Board();
-        board.makeMove(1, PlayerTurn.FIRST_PLAYER);
+        BoardModel board = new BoardModel();
+        board.makeMove(1);
 
-        Board expected = TestUtils.createBoard(
+        BoardModel expected = TestUtils.createBoard(
                 List.of(6, 0, 7, 7, 7, 7),
                 1,
                 List.of(7, 6, 6, 6, 6, 6),
                 0,
-                PlayerTurn.SECOND_PLAYER,
-                null);
+                PlayerTurn.SECOND_PLAYER);
         assertThat(board).isEqualTo(expected);
     }
 
     @Test
     void shouldRepeatMoveIfEndsInKalah() {
-        Board board = new Board();
-        board.makeMove(0, PlayerTurn.FIRST_PLAYER);
+        BoardModel board = new BoardModel();
+        board.makeMove(0);
 
-        Board expected = TestUtils.createBoard(
+        BoardModel expected = TestUtils.createBoard(
                 List.of(0, 7, 7, 7, 7, 7),
                 1,
                 List.of(6, 6, 6, 6, 6, 6),
                 0,
-                PlayerTurn.FIRST_PLAYER,
-                null);
+                PlayerTurn.FIRST_PLAYER);
         assertThat(board).isEqualTo(expected);
     }
 
     @Test
     void shouldMakeSimpleMoveFromSecondPlayer() {
-        Board board = new Board();
-        board.makeMove(4, PlayerTurn.SECOND_PLAYER);
-
-        Board expected = TestUtils.createBoard(
-                List.of(7, 7, 7, 7, 6, 6),
+        BoardModel board = TestUtils.createBoard(
+                Lists.newArrayList(0, 7, 7, 7, 7, 7),
+                1,
+                Lists.newArrayList(6, 6, 6, 6, 6, 6),
                 0,
+                PlayerTurn.SECOND_PLAYER);
+        board.makeMove(4);
+
+        BoardModel expected = TestUtils.createBoard(
+                List.of(1, 8, 8, 8, 7, 7),
+                1,
                 List.of(6, 6, 6, 6, 0, 7),
                 1,
-                PlayerTurn.FIRST_PLAYER,
-                null);
+                PlayerTurn.FIRST_PLAYER);
         assertThat(board).isEqualTo(expected);
     }
 
     @Test
     void shouldRepeatMoveIfEndsInKalahSecondPlayer() {
-        Board board = new Board();
-        board.makeMove(0, PlayerTurn.SECOND_PLAYER);
-
-        Board expected = TestUtils.createBoard(
-                List.of(6, 6, 6, 6, 6, 6),
+        BoardModel board = TestUtils.createBoard(
+                Lists.newArrayList(0, 7, 7, 7, 7, 7),
+                1,
+                Lists.newArrayList(6, 6, 6, 6, 6, 6),
                 0,
+                PlayerTurn.SECOND_PLAYER);
+        board.makeMove(0);
+
+        BoardModel expected = TestUtils.createBoard(
                 List.of(0, 7, 7, 7, 7, 7),
                 1,
-                PlayerTurn.SECOND_PLAYER,
-                null);
+                List.of(0, 7, 7, 7, 7, 7),
+                1,
+                PlayerTurn.SECOND_PLAYER);
         assertThat(board).isEqualTo(expected);
     }
 
     @Test
     void shouldMakeCapture() {
-        Board board = TestUtils.createBoard(
+        BoardModel board = TestUtils.createBoard(
                 Lists.newArrayList(0, 2, 0, 0, 0, 0),
                 0,
                 Lists.newArrayList(0, 0, 5, 3, 0, 0),
-                0);
-        board.makeMove(1, PlayerTurn.FIRST_PLAYER);
+                0,
+                PlayerTurn.FIRST_PLAYER);
+        board.makeMove(1);
 
-        Board expected = TestUtils.createBoard(
+        BoardModel expected = TestUtils.createBoard(
                 List.of(0, 0, 1, 0, 0, 0),
                 6,
                 List.of(0, 0, 0, 3, 0, 0),
                 0,
-                PlayerTurn.SECOND_PLAYER,
-                null);
+                PlayerTurn.SECOND_PLAYER);
         assertThat(board).isEqualTo(expected);
     }
 
     @Test
     void shouldMakeCaptureForSecondPlayer() {
-        Board board = TestUtils.createBoard(
+        BoardModel board = TestUtils.createBoard(
                 Lists.newArrayList(1, 0, 8, 0, 0, 1),
                 10,
                 Lists.newArrayList(3, 4, 5, 0, 7, 5),
-                10);
-        board.makeMove(0, PlayerTurn.SECOND_PLAYER);
+                10,
+                PlayerTurn.SECOND_PLAYER);
+        board.makeMove(0);
 
-        Board expected = TestUtils.createBoard(
+        BoardModel expected = TestUtils.createBoard(
                 List.of(1, 0, 0, 0, 0, 1),
                 10,
                 List.of(0, 5, 6, 0, 7, 5),
                 19,
-                PlayerTurn.FIRST_PLAYER,
-                null);
+                PlayerTurn.FIRST_PLAYER);
         assertThat(board).isEqualTo(expected);
     }
 
     @Test
     void shouldRepeatAroundTheBoardIfMoreThan12Stones() {
-        Board board = TestUtils.createBoard(
+        BoardModel board = TestUtils.createBoard(
                 Lists.newArrayList(14, 5, 3, 2, 7, 0),
                 4,
                 Lists.newArrayList(4, 2, 5, 0, 8, 0),
-                3);
-        board.makeMove(0, PlayerTurn.FIRST_PLAYER);
+                3,
+                PlayerTurn.FIRST_PLAYER);
+        board.makeMove(0);
 
-        Board expected = TestUtils.createBoard(
+        BoardModel expected = TestUtils.createBoard(
                 List.of(1, 7, 4, 3, 8, 1),
                 5,
                 List.of(5, 3, 6, 1, 9, 1),
                 3,
-                PlayerTurn.SECOND_PLAYER,
-                null);
+                PlayerTurn.SECOND_PLAYER);
         assertThat(board).isEqualTo(expected);
     }
 
     @Test
     void shouldRepeatAroundTheBoardAndCapture() {
-        Board board = TestUtils.createBoard(
+        BoardModel board = TestUtils.createBoard(
                 Lists.newArrayList(13, 5, 3, 2, 7, 0),
                 4,
                 Lists.newArrayList(4, 2, 5, 0, 8, 0),
-                3);
-        board.makeMove(0, PlayerTurn.FIRST_PLAYER);
+                3,
+                PlayerTurn.FIRST_PLAYER);
+        board.makeMove(0);
 
-        Board expected = TestUtils.createBoard(
+        BoardModel expected = TestUtils.createBoard(
                 List.of(0, 6, 4, 3, 8, 1),
                 7,
                 List.of(5, 3, 6, 1, 9, 0),
                 3,
-                PlayerTurn.SECOND_PLAYER,
-                null);
+                PlayerTurn.SECOND_PLAYER);
         assertThat(board).isEqualTo(expected);
     }
 
     @Test
     void shouldNotCaptureIfOppositePitIsEmpty() {
-        Board board = TestUtils.createBoard(
+        BoardModel board = TestUtils.createBoard(
                 Lists.newArrayList(13, 2, 0, 0, 7, 0),
                 4,
                 Lists.newArrayList(4, 2, 0, 0, 8, 0),
-                3);
-        board.makeMove(1, PlayerTurn.FIRST_PLAYER);
+                3,
+                PlayerTurn.FIRST_PLAYER);
+        board.makeMove(1);
 
-        Board expected = TestUtils.createBoard(
+        BoardModel expected = TestUtils.createBoard(
                 List.of(13, 0, 1, 1, 7, 0),
                 4,
                 List.of(4, 2, 0, 0, 8, 0),
                 3,
-                PlayerTurn.SECOND_PLAYER,
-                null);
+                PlayerTurn.SECOND_PLAYER);
         assertThat(board).isEqualTo(expected);
     }
 
     @Test
     void shouldFinishGame() {
-        Board board = TestUtils.createBoard(
+        BoardModel board = TestUtils.createBoard(
                 Lists.newArrayList(0, 0, 0, 0, 0, 5),
                 30,
                 Lists.newArrayList(2, 5, 0, 2, 7, 0),
-                40);
-        board.makeMove(5, PlayerTurn.FIRST_PLAYER);
+                40,
+                PlayerTurn.FIRST_PLAYER);
+        board.makeMove(5);
 
-        Board expected = TestUtils.createBoard(
+        BoardModel expected = TestUtils.createBoard(
                 List.of(0, 0, 0, 0, 0, 0),
                 31,
                 List.of(0, 0, 0, 0, 0, 0),
@@ -186,14 +193,15 @@ public class BoardTest {
 
     @Test
     void shouldFinishGameWithCapture() {
-        Board board = TestUtils.createBoard(
+        BoardModel board = TestUtils.createBoard(
                 Lists.newArrayList(3, 4, 5, 0, 7, 5),
                 10,
                 Lists.newArrayList(0, 0, 8, 0, 0, 0),
-                10);
-        board.makeMove(0, PlayerTurn.FIRST_PLAYER);
+                10,
+                PlayerTurn.FIRST_PLAYER);
+        board.makeMove(0);
 
-        Board expected = TestUtils.createBoard(
+        BoardModel expected = TestUtils.createBoard(
                 List.of(0, 0, 0, 0, 0, 0),
                 42,
                 List.of(0, 0, 0, 0, 0, 0),
@@ -205,14 +213,15 @@ public class BoardTest {
 
     @Test
     void shouldFinishGameWithDraw() {
-        Board board = TestUtils.createBoard(
+        BoardModel board = TestUtils.createBoard(
                 Lists.newArrayList(3, 4, 5, 0, 7, 5),
                 8,
                 Lists.newArrayList(0, 0, 0, 0, 0, 5),
-                35);
-        board.makeMove(5, PlayerTurn.SECOND_PLAYER);
+                35,
+                PlayerTurn.SECOND_PLAYER);
+        board.makeMove(5);
 
-        Board expected = TestUtils.createBoard(
+        BoardModel expected = TestUtils.createBoard(
                 List.of(0, 0, 0, 0, 0, 0),
                 36,
                 List.of(0, 0, 0, 0, 0, 0),

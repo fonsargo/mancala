@@ -1,41 +1,51 @@
 package com.bol.mancala.model;
 
+import com.bol.mancala.repository.entity.Board;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
-import java.util.List;
-
 @AllArgsConstructor
 @Getter
 @EqualsAndHashCode
 @ToString
-public class Board {
+public class BoardModel {
+
+    public static final int PITS_COUNT = 6;
+    public static final int INITIAL_STONES_COUNT = 6;
 
     private BoardHalf firstPlayerHalf;
     private BoardHalf secondPlayerHalf;
     private PlayerTurn playerTurn;
     private WinnerType result;
 
-    public Board() {
+    public BoardModel() {
         this.firstPlayerHalf = new BoardHalf();
         this.secondPlayerHalf = new BoardHalf();
+        this.playerTurn = PlayerTurn.FIRST_PLAYER;
     }
 
-    public Board(List<Integer> firstPlayerPits, int firstPlayerLargePit, List<Integer> secondPlayerPits, int secondPlayerLargePit) {
-        this.firstPlayerHalf = new BoardHalf(firstPlayerPits, firstPlayerLargePit);
-        this.secondPlayerHalf = new BoardHalf(secondPlayerPits, secondPlayerLargePit);
+    public static BoardModel fromBoard(Board board) {
+        BoardHalf firstPlayerHalf = new BoardHalf(board.getFirstPlayerPits(), board.getFirstPlayerLargePit());
+        BoardHalf secondPlayerHalf = new BoardHalf(board.getSecondPlayerPits(), board.getSecondPlayerLargePit());
+        return new BoardModel(firstPlayerHalf, secondPlayerHalf, board.getPlayerTurn(), board.getResult());
     }
 
-    public void makeMove(int pitIndex, PlayerTurn player) {
+    public void makeMove(int pitIndex) {
+        if (pitIndex >= BoardModel.PITS_COUNT) {
+            throw new IllegalArgumentException("Wrong pit index: " + pitIndex + ", pit index should be from 0 to 5");
+        }
+
         boolean repeatTurn;
-        if (player == PlayerTurn.FIRST_PLAYER) {
+        if (playerTurn == PlayerTurn.FIRST_PLAYER) {
             repeatTurn = makeMove(pitIndex, firstPlayerHalf, secondPlayerHalf);
         } else {
             repeatTurn = makeMove(pitIndex, secondPlayerHalf, firstPlayerHalf);
         }
-        this.playerTurn = repeatTurn ? player : player.toggle();
+        if (!repeatTurn) {
+            this.playerTurn = playerTurn.toggle();
+        }
         checkFinished();
     }
 

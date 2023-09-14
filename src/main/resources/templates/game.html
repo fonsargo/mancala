@@ -11,7 +11,7 @@
 
 <body>
 <h1>Mancala</h1>
-<h2><a id="gameLink" th:href="@{/game/{id}(id=${game.id})}">Game URL</a></h2>
+<h2><a id="gameLink" th:href="@{/game/{id}/connect(id=${gameId})}">Connect to game URL</a></h2>
 <div class="tooltip">
     <button class="button" onclick="copyLinkToClipboard()">
         <span class="tooltiptext" id="copyTooltip">Copy to clipboard</span>
@@ -49,13 +49,13 @@
 <script th:inline="javascript">
     /*<![CDATA[*/
 
-    var isFirstPlayer = /*[[${isFirstPlayer}]]*/ true;
-    var gameId = /*[[${game.id}]]*/ '';
+    var isFirstPlayer = /*[[${game.isFirstPlayer}]]*/ true;
+    var gameId = /*[[${gameId}]]*/ '';
 
     (function() {
-        var game = /*[[${game}]]*/ '';
-        var status = /*[[${status}]]*/'';
-        updateGame(game, status);
+        var board = /*[[${game.board}]]*/ '';
+        var status = /*[[${game.status}]]*/'';
+        updateGame(board, status);
     })();
 
     /*]]>*/
