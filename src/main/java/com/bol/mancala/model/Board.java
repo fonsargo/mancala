@@ -6,9 +6,6 @@ import lombok.Getter;
 import lombok.ToString;
 
 import java.util.List;
-import java.util.ListIterator;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @AllArgsConstructor
 @Getter
@@ -16,111 +13,80 @@ import java.util.stream.IntStream;
 @ToString
 public class Board {
 
-    public static final int PITS_COUNT = 6;
-    public static final int INITIAL_STONES_COUNT = 6;
-
-    private List<Integer> myPits;
-    private int myLargePit;
-    private List<Integer> opponentPits;
-    private int opponentLargePit;
-    private boolean repeatTurn = false;
-    private GameResult result;
+    private BoardHalf firstPlayerHalf;
+    private BoardHalf secondPlayerHalf;
+    private PlayerTurn playerTurn;
+    private WinnerType result;
 
     public Board() {
-        this.myPits = IntStream.range(0, PITS_COUNT).map(operand -> INITIAL_STONES_COUNT).boxed().collect(Collectors.toList());
-        this.myLargePit = 0;
-        this.opponentPits = IntStream.range(0, PITS_COUNT).map(operand -> INITIAL_STONES_COUNT).boxed().collect(Collectors.toList());
-        this.opponentLargePit = 0;
+        this.firstPlayerHalf = new BoardHalf();
+        this.secondPlayerHalf = new BoardHalf();
     }
 
-    public Board(List<Integer> myPits, int myLargePit, List<Integer> opponentPits, int opponentLargePit) {
-        this.myPits = myPits;
-        this.myLargePit = myLargePit;
-        this.opponentPits = opponentPits;
-        this.opponentLargePit = opponentLargePit;
+    public Board(List<Integer> firstPlayerPits, int firstPlayerLargePit, List<Integer> secondPlayerPits, int secondPlayerLargePit) {
+        this.firstPlayerHalf = new BoardHalf(firstPlayerPits, firstPlayerLargePit);
+        this.secondPlayerHalf = new BoardHalf(secondPlayerPits, secondPlayerLargePit);
     }
 
-    public Board makeMove(int pitIndex) {
-        Integer stones = myPits.set(pitIndex, 0);
-        if (stones == 0) {
-            //todo throw
-            throw new IllegalArgumentException("Can't make move: pit with index: " + pitIndex + " is empty");
+    public void makeMove(int pitIndex, PlayerTurn player) {
+        boolean repeatTurn;
+        if (player == PlayerTurn.FIRST_PLAYER) {
+            repeatTurn = makeMove(pitIndex, firstPlayerHalf, secondPlayerHalf);
+        } else {
+            repeatTurn = makeMove(pitIndex, secondPlayerHalf, firstPlayerHalf);
         }
-
-        int startIndex = pitIndex + 1;
-        while (stones > 0) {
-            stones = sowToMy(startIndex, stones);
-            startIndex = 0;
-
-            if (stones > 0) {
-                myLargePit += 1;
-                stones--;
-                if (stones == 0) {
-                    // keep player turn
-                    repeatTurn = true;
-                }
-            }
-
-            stones = sowToOpponent(stones);
-        }
-
+        this.playerTurn = repeatTurn ? player : player.toggle();
         checkFinished();
-        return this;
     }
 
     public boolean isGameOver() {
         return result != null;
     }
 
-    private Integer sowToMy(Integer index, Integer stones) {
-        ListIterator<Integer> iterator = myPits.listIterator(index);
-        ListIterator<Integer> oppositeIterator = opponentPits.listIterator(PITS_COUNT - index);
-        while (stones > 0 && iterator.hasNext()) {
-            Integer currentStones = iterator.next();
-            Integer oppositeStones = oppositeIterator.previous();
-            if (currentStones == 0 && stones == 1 && oppositeStones > 0) {
-                myLargePit += stones + oppositeStones;
-                oppositeIterator.set(0);
-            } else {
-                iterator.set(currentStones + 1);
-            }
-            stones--;
+    /**
+     * Make move from pit index in current player's half of board.
+     *
+     * @return true, if current player get extra turn, otherwise false
+     */
+    private boolean makeMove(int pitIndex, BoardHalf myHalf, BoardHalf opponentHalf) {
+        Integer stones = myHalf.set(pitIndex, 0);
+        if (stones == 0) {
+            throw new IllegalArgumentException("Can't make move: pit with index: " + pitIndex + " is empty");
         }
-        return stones;
-    }
 
-    private Integer sowToOpponent(Integer stones) {
-        ListIterator<Integer> iterator = opponentPits.listIterator();
-        while (stones > 0 && iterator.hasNext()) {
-            Integer currentStones = iterator.next();
-            iterator.set(currentStones + 1);
-            stones--;
+        int startIndex = pitIndex + 1;
+        while (stones > 0) {
+            stones = myHalf.sowToMy(startIndex, stones, opponentHalf);
+            startIndex = 0;
+
+            if (stones > 0) {
+                stones = myHalf.sowToLargePit(stones);
+                if (stones == 0) {
+                    // keep player turn
+                    return true;
+                }
+            }
+
+            stones = opponentHalf.sowToOpponent(stones);
         }
-        return stones;
+
+        return false;
     }
 
     private void checkFinished() {
-        int mySum = getSum(myPits);
-        int opponentSum = getSum(opponentPits);
-        if (mySum == 0 || opponentSum == 0) {
-            myLargePit += pickUpAll(myPits);
-            opponentLargePit += pickUpAll(opponentPits);
+        int firstPlayerHalfSum = firstPlayerHalf.getSum();
+        int secondPlayerHalfSum = secondPlayerHalf.getSum();
+        if (firstPlayerHalfSum == 0 || secondPlayerHalfSum == 0) {
+            firstPlayerHalf.moveAllToLargePit();
+            secondPlayerHalf.moveAllToLargePit();
 
-            if (myLargePit > opponentLargePit) {
-                result = GameResult.WIN;
-            } else if (opponentLargePit > myLargePit) {
-                result = GameResult.LOSE;
+            if (firstPlayerHalf.getLargePit() > secondPlayerHalf.getLargePit()) {
+                this.result = WinnerType.FIRST_PLAYER;
+            } else if (secondPlayerHalf.getLargePit() > firstPlayerHalf.getLargePit()) {
+                this.result = WinnerType.SECOND_PLAYER;
             } else {
-                result = GameResult.DRAW;
+                this.result = WinnerType.DRAW;
             }
         }
-    }
-
-    private Integer getSum(List<Integer> pits) {
-        return pits.stream().mapToInt(Integer::intValue).sum();
-    }
-
-    private int pickUpAll(List<Integer> pits) {
-        return IntStream.range(0, pits.size()).map(i -> pits.set(i, 0)).sum();
     }
 }
