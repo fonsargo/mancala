@@ -106,7 +106,7 @@ function stompFailureCallback(error) {
     console.log('STOMP: ' + error);
     setTimeout(connectWebSocket, 10000);
     console.log('STOMP: Reconnecting in 10 seconds');
-};
+}
 
 function copyLinkToClipboard() {
     var link = document.getElementById("gameLink").href;
